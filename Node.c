@@ -22,13 +22,29 @@
 #define ELEC_CONFIRMED 3;
 
 
-struct prepared_state{
-    uint64_t max_rand;
-    char addr[20];
-    int is_me;
+enum state_t{
+    STATE_EMPTY = 0,
+    //propose
+    STATE_PREPARE_SENT = 1,
+    STATE_CONFIRM_SENT = 2,
+    STATE_ELECTED = 3,
+    //follower
+    STATE_PREPARED = 4,
+    STATE_CONFIRMED = 5
 };
 
-typedef struct prepared_state prepared_state;
+
+struct instance_t{
+    enum state_t state;
+    uint64_t max_rand;
+    char addr[20];
+    char **prepared_addr;
+    int prepared_addr_count;
+    char **confirmed_addr;
+    int confirmed_addr_count;
+};
+
+typedef struct instance_t instance_t;
 
 
 struct Term_t{
@@ -38,8 +54,10 @@ struct Term_t{
     struct sockaddr_in *members;
     uint64_t member_count;
     //Protocol state.
-    prepared_state *prepared; //size is len;
-    uint64_t *Confirmed;
+    instance_t *instances; //size is len;'
+    //
+    char my_addr[20];
+
 };
 
 typedef struct Term_t Term_t;
@@ -89,8 +107,14 @@ int New_Node(int member_size){
 
 
     term->cur_block = term->start_block - 1;
-    term->prepared = (prepared_state *) malloc(term->len * sizeof(prepared_state));
-    
+    term->instances = (instance_t *) malloc(term->len * sizeof(instance_t));
+    int i;
+    for (i = 0; i < term->len; i++){
+        term->instances[i].max_rand = 0;
+        term->instances[i].state = STATE_EMPTY;
+        term->instances[i].confirmed_addr_count = 0;
+        term->instances[i].prepared_addr_count = 0;
+    }
 
 
 
@@ -110,12 +134,118 @@ struct RecvFuncParam{
 
 };
 
-void handle_prepare(const Message *msg){
+void handle_prepare(const Message *msg, int socket, const struct sockaddr_in *si_other){
     uint64_t offset = msg->blockNum - term->start_block;
+    instance_t *instance = &term->instances[offset];
+
+    if (instance->state == STATE_EMPTY || instance->state == STATE_PREPARED || instance->state == STATE_PREPARE_SENT) {
+        if (msg->rand > instance->max_rand) {
+            //receive
+            instance->max_rand = msg->rand;
+            memcpy(instance->addr, msg->addr, 20);
+            instance->state = STATE_PREPARED;
+            Message resp;
+            resp.rand = msg->rand;
+            resp.blockNum = msg->blockNum;
+            resp.message_type = ELEC_PREPARED;
+            memcpy(resp.addr, term->my_addr, 20);
+            char *output = serialize(&resp);
+            if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *) &si_other, sizeof(si_other)) == -1) {
+                printf("Failed to send resp");
+            }
+        }
+    }
+}
+
+
+int insert_addr(char **addr_array, char *addr,  int *count){
+    int i;
+    for (i = 0; i<*count; i++){
+        if (memcmp(addr_array[i], addr, 20) == 0){
+            return 1; //already in the list.
+        }
+    }
+    memcpy(addr_array[*count], addr, 20);
+    *count = *count +1;
+    return 0;
+}
+
+int broadcast(const Message *msg, int socket){
+    int i;
+    ssize_t ret;
+    char *buf = serialize(msg);
+    for (i = 0; i<term->member_count; i++){
+        ret = sendto(socket, buf, MSG_LEN, 0, (struct sockaddr*)&term->members[i], sizeof(struct sockaddr_in));
+        if (ret == -1){
+            printf("Failed to send message");
+            return -1;
+        }
+    }
+    return 0;
+}
+
+void handle_prepared(const Message *msg, int socket, const struct sockaddr_in *si_other) {
+    uint64_t offset = msg->blockNum - term->start_block;
+    instance_t *instance = &term->instances[offset];
+    if (instance->state == STATE_PREPARE_SENT){
+        int ret = insert_addr(instance->prepared_addr, msg->addr, &instance->prepared_addr_count);
+        if (ret != 0){
+            return;
+        }
+        if (instance->prepared_addr_count > term->member_count  / 2) {
+            Message resp;
+            memcpy(resp.addr, term->my_addr, 20);
+            resp.message_type = ELEC_CONFIRM;
+            resp.blockNum =  msg->blockNum;
+            resp.rand = msg->rand;
+            ret = broadcast(&resp, socket);
+            if (ret != 0){
+                printf("failed to broadcast Confirm message");
+            }
+        }
+        instance->state = STATE_CONFIRM_SENT;
+    }
 
 }
 
 
+
+void handle_confirm(const Message *msg, int socket, const struct sockaddr_in *si_other) {
+    uint64_t offset = msg->blockNum - term->start_block;
+    instance_t *instance = &term->instances[offset];
+    if (instance-> max_rand > msg->rand){
+        //already prepared a higher.
+        return;
+    }
+    if (instance-> state == STATE_CONFIRM_SENT || instance ->state == STATE_CONFIRMED) {
+        return;
+    }
+    Message resp;
+    memcpy(resp.addr, term->my_addr, 20);
+    resp.rand = msg->rand;
+    resp.blockNum = msg->blockNum;
+    resp.message_type = ELEC_CONFIRMED;
+    char *output = serialize(&resp);
+    if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *) &si_other, sizeof(si_other)) == -1) {
+        printf("Failed to send resp");
+    }
+    instance->state = STATE_CONFIRMED;
+    return;
+}
+
+void handle_confirmed(const Message *msg, int socket, const struct sockaddr_in *si_other) {
+    uint64_t offset = msg->blockNum - term->start_block;
+    instance_t *instance = &term->instances[offset];
+    if (instance->state == STATE_CONFIRM_SENT) {
+        int ret = insert_addr(instance->confirmed_addr, msg->addr, &instance->confirmed_addr_count);
+        if (ret != 0) {
+            return;
+        }
+        if (instance->confirmed_addr_count > term->member_count / 2) {
+            instance->state = STATE_ELECTED;
+        }
+    }
+}
 
 void *RecvFunc(void *opaque){
     int s;
@@ -141,17 +271,19 @@ void *RecvFunc(void *opaque){
         Message msg = deserialize(buffer);
         switch(msg.message_type){
             case ELEC_PREPARE :
-                handle_prepare()
+                handle_prepare(&msg, s, &si_other);
                 break;
-
-
+            case ELEC_PREPARED :
+                handle_prepared(&msg, s, &si_other);
+                break;
+            case ELEC_CONFIRM :
+                handle_confirm(&msg, s, &si_other);
+                break;
+            case ELEC_CONFIRMED :
+                handle_confirmed(&msg, s, &si_other);
+                break;
         }
-        
+
     }
-
-}
-
-int elect(uint64_t round){
-    srand(time(NULL));
 
 }
