@@ -34,19 +34,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = "/Users/xusheng/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/181.4203.549/CLion.app/Contents/bin/cmake/bin/cmake"
+CMAKE_COMMAND = /home/xusheng/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/181.4203.549/bin/cmake/bin/cmake
 
 # The command to remove a file.
-RM = "/Users/xusheng/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/181.4203.549/CLion.app/Contents/bin/cmake/bin/cmake" -E remove -f
+RM = /home/xusheng/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/181.4203.549/bin/cmake/bin/cmake -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/xusheng/codes/Leader-election
+CMAKE_SOURCE_DIR = /home/xusheng/codes/Minimal-Election
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/xusheng/codes/Leader-election/cmake-build-debug
+CMAKE_BINARY_DIR = /home/xusheng/codes/Minimal-Election/cmake-build-debug
 
 # Include any dependencies generated for this target.
 include CMakeFiles/Leader_election.dir/depend.make
@@ -59,16 +59,16 @@ include CMakeFiles/Leader_election.dir/flags.make
 
 CMakeFiles/Leader_election.dir/main.c.o: CMakeFiles/Leader_election.dir/flags.make
 CMakeFiles/Leader_election.dir/main.c.o: ../main.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/Leader_election.dir/main.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/Leader_election.dir/main.c.o   -c /Users/xusheng/codes/Leader-election/main.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/Leader_election.dir/main.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/Leader_election.dir/main.c.o   -c /home/xusheng/codes/Minimal-Election/main.c
 
 CMakeFiles/Leader_election.dir/main.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/Leader_election.dir/main.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/xusheng/codes/Leader-election/main.c > CMakeFiles/Leader_election.dir/main.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/xusheng/codes/Minimal-Election/main.c > CMakeFiles/Leader_election.dir/main.c.i
 
 CMakeFiles/Leader_election.dir/main.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/Leader_election.dir/main.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/xusheng/codes/Leader-election/main.c -o CMakeFiles/Leader_election.dir/main.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/xusheng/codes/Minimal-Election/main.c -o CMakeFiles/Leader_election.dir/main.c.s
 
 CMakeFiles/Leader_election.dir/main.c.o.requires:
 
@@ -83,16 +83,16 @@ CMakeFiles/Leader_election.dir/main.c.o.provides.build: CMakeFiles/Leader_electi
 
 CMakeFiles/Leader_election.dir/API.c.o: CMakeFiles/Leader_election.dir/flags.make
 CMakeFiles/Leader_election.dir/API.c.o: ../API.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/Leader_election.dir/API.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/Leader_election.dir/API.c.o   -c /Users/xusheng/codes/Leader-election/API.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/Leader_election.dir/API.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/Leader_election.dir/API.c.o   -c /home/xusheng/codes/Minimal-Election/API.c
 
 CMakeFiles/Leader_election.dir/API.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/Leader_election.dir/API.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/xusheng/codes/Leader-election/API.c > CMakeFiles/Leader_election.dir/API.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/xusheng/codes/Minimal-Election/API.c > CMakeFiles/Leader_election.dir/API.c.i
 
 CMakeFiles/Leader_election.dir/API.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/Leader_election.dir/API.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/xusheng/codes/Leader-election/API.c -o CMakeFiles/Leader_election.dir/API.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/xusheng/codes/Minimal-Election/API.c -o CMakeFiles/Leader_election.dir/API.c.s
 
 CMakeFiles/Leader_election.dir/API.c.o.requires:
 
@@ -107,16 +107,16 @@ CMakeFiles/Leader_election.dir/API.c.o.provides.build: CMakeFiles/Leader_electio
 
 CMakeFiles/Leader_election.dir/Node.c.o: CMakeFiles/Leader_election.dir/flags.make
 CMakeFiles/Leader_election.dir/Node.c.o: ../Node.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/Leader_election.dir/Node.c.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/Leader_election.dir/Node.c.o   -c /Users/xusheng/codes/Leader-election/Node.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/Leader_election.dir/Node.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/Leader_election.dir/Node.c.o   -c /home/xusheng/codes/Minimal-Election/Node.c
 
 CMakeFiles/Leader_election.dir/Node.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/Leader_election.dir/Node.c.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/xusheng/codes/Leader-election/Node.c > CMakeFiles/Leader_election.dir/Node.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/xusheng/codes/Minimal-Election/Node.c > CMakeFiles/Leader_election.dir/Node.c.i
 
 CMakeFiles/Leader_election.dir/Node.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/Leader_election.dir/Node.c.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/xusheng/codes/Leader-election/Node.c -o CMakeFiles/Leader_election.dir/Node.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/xusheng/codes/Minimal-Election/Node.c -o CMakeFiles/Leader_election.dir/Node.c.s
 
 CMakeFiles/Leader_election.dir/Node.c.o.requires:
 
@@ -143,7 +143,7 @@ Leader_election: CMakeFiles/Leader_election.dir/API.c.o
 Leader_election: CMakeFiles/Leader_election.dir/Node.c.o
 Leader_election: CMakeFiles/Leader_election.dir/build.make
 Leader_election: CMakeFiles/Leader_election.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking C executable Leader_election"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking C executable Leader_election"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Leader_election.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -162,6 +162,6 @@ CMakeFiles/Leader_election.dir/clean:
 .PHONY : CMakeFiles/Leader_election.dir/clean
 
 CMakeFiles/Leader_election.dir/depend:
-	cd /Users/xusheng/codes/Leader-election/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/xusheng/codes/Leader-election /Users/xusheng/codes/Leader-election /Users/xusheng/codes/Leader-election/cmake-build-debug /Users/xusheng/codes/Leader-election/cmake-build-debug /Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles/Leader_election.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/xusheng/codes/Minimal-Election/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/xusheng/codes/Minimal-Election /home/xusheng/codes/Minimal-Election /home/xusheng/codes/Minimal-Election/cmake-build-debug /home/xusheng/codes/Minimal-Election/cmake-build-debug /home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles/Leader_election.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/Leader_election.dir/depend
 
