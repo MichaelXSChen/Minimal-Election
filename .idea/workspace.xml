@@ -12,10 +12,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2632bf00-b55d-4823-93e9-c34b68b7d04e" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/API.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/API.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Node.c" beforeDir="false" afterPath="$PROJECT_DIR$/Node.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Node.h" beforeDir="false" afterPath="$PROJECT_DIR$/Node.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
@@ -37,8 +33,8 @@
             <file leaf-file-name="Node.h" pinned="false" current-in-tab="true">
               <entry file="file://$PROJECT_DIR$/Node.h">
                 <provider selected="true" editor-type-id="text-editor">
-                  <state relative-caret-position="537">
-                    <caret line="41" column="31" selection-start-line="41" selection-start-column="24" selection-end-line="41" selection-end-column="31" />
+                  <state relative-caret-position="681">
+                    <caret line="47" column="20" selection-start-line="47" selection-start-column="20" selection-end-line="47" selection-end-column="20" />
                     <folding>
                       <element signature="e#120#139#0" expanded="true" />
                     </folding>
@@ -57,8 +53,8 @@
       <file leaf-file-name="main.c" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
-              <caret line="11" column="14" selection-start-line="11" selection-start-column="14" selection-end-line="11" selection-end-column="14" />
+            <state relative-caret-position="480">
+              <caret line="20" column="36" selection-start-line="20" selection-start-column="36" selection-end-line="20" selection-end-column="36" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -69,8 +65,8 @@
       <file leaf-file-name="Node.c" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Node.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-6605">
-              <caret line="12" column="19" selection-start-line="12" selection-start-column="19" selection-end-line="12" selection-end-column="19" />
+            <state relative-caret-position="336">
+              <caret line="89" column="43" lean-forward="true" selection-start-line="89" selection-start-column="43" selection-end-line="89" selection-end-column="43" />
               <folding>
                 <element signature="e#55#72#0" expanded="true" />
               </folding>
@@ -83,6 +79,7 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>broadcast</find>
+      <find>my_addr</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -170,12 +167,12 @@
       <updated>1523447014222</updated>
       <workItem from="1523447016265" duration="3193000" />
       <workItem from="1523512379996" duration="21697000" />
-      <workItem from="1523609719685" duration="1974000" />
+      <workItem from="1523609719685" duration="2827000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="26864000" />
+    <option name="totallyTimeSpent" value="27717000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1919" y="-11" width="1922" height="1092" extended-state="6" />
@@ -281,8 +278,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Node.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="537">
-          <caret line="41" column="31" selection-start-line="41" selection-start-column="24" selection-end-line="41" selection-end-column="31" />
+        <state relative-caret-position="681">
+          <caret line="47" column="20" selection-start-line="47" selection-start-column="20" selection-end-line="47" selection-end-column="20" />
           <folding>
             <element signature="e#120#139#0" expanded="true" />
           </folding>
@@ -291,8 +288,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Node.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-6605">
-          <caret line="12" column="19" selection-start-line="12" selection-start-column="19" selection-end-line="12" selection-end-column="19" />
+        <state relative-caret-position="336">
+          <caret line="89" column="43" lean-forward="true" selection-start-line="89" selection-start-column="43" selection-end-line="89" selection-end-column="43" />
           <folding>
             <element signature="e#55#72#0" expanded="true" />
           </folding>
@@ -301,8 +298,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="11" column="14" selection-start-line="11" selection-start-column="14" selection-end-line="11" selection-end-column="14" />
+        <state relative-caret-position="480">
+          <caret line="20" column="36" selection-start-line="20" selection-start-column="36" selection-end-line="20" selection-end-column="36" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>

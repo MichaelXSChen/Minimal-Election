@@ -56,7 +56,7 @@ Term_t* New_Node(int offset){ //currently for hardcoded message.
         term->members[x].sin_port = htons(11110+x);
         term->members[x].sin_addr.s_addr = htonl(INADDR_ANY);
     }
-    term->my_addr[0] = 'A' + offset;
+    term->my_account[0] = 'A' + offset;
 
 
     int i;
@@ -86,14 +86,13 @@ Term_t* New_Node(int offset){ //currently for hardcoded message.
         printf("Failed to create socket");
         pthread_exit(NULL);
     }
-    if (bind(term->sock, (struct sockaddr*)&term->my_addr, sizeof(term->my_addr)) == -1){
+    if (bind(term->sock, (struct sockaddr*)&term->members[offset], sizeof(term->members[offset])) == -1){
         printf("Failed to bind to socket");
         pthread_exit(NULL);
     }
 
-    pthread_t recvt;
     int ret;
-    ret = pthread_create(&recvt, NULL, RecvFunc, (void *)term);
+    ret = pthread_create(&term->recvt, NULL, RecvFunc, (void *)term);
     if (ret != 0){
         printf("Failed to create thread");
     }
@@ -120,7 +119,7 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
             resp.rand = msg->rand;
             resp.blockNum = msg->blockNum;
             resp.message_type = ELEC_PREPARED;
-            memcpy(resp.addr, term->my_addr, 20);
+            memcpy(resp.addr, term->my_account, 20);
             char *output = serialize(&resp);
             if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *) &si_other, sizeof(si_other)) == -1) {
                 printf("Failed to send resp");
@@ -144,7 +143,7 @@ void handle_prepared(const Message *msg, const struct sockaddr_in *si_other, Ter
         }
         if (instance->prepared_addr_count > term->member_count  / 2) {
             Message resp;
-            memcpy(resp.addr, term->my_addr, 20);
+            memcpy(resp.addr, term->my_account, 20);
             resp.message_type = ELEC_CONFIRM;
             resp.blockNum =  msg->blockNum;
             resp.rand = msg->rand;
@@ -175,7 +174,7 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
         return;
     }
     Message resp;
-    memcpy(resp.addr, term->my_addr, 20);
+    memcpy(resp.addr, term->my_account, 20);
     resp.rand = msg->rand;
     resp.blockNum = msg->blockNum;
     resp.message_type = ELEC_CONFIRMED;
@@ -201,7 +200,7 @@ void handle_confirmed(const Message *msg, const struct sockaddr_in *si_other, Te
         }
         if (instance->confirmed_addr_count > term->member_count / 2) {
             Message resp;
-            memcpy(resp.addr, term->my_addr, 20);
+            memcpy(resp.addr, term->my_account, 20);
             resp.message_type = ELEC_ANNOUNCE;
             resp.blockNum =  msg->blockNum;
             resp.rand = msg->rand;
@@ -264,7 +263,7 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
         msg.blockNum = blk;
         msg.message_type = ELEC_PREPARE;
         msg.rand = r;
-        memcpy(msg.addr, term->my_addr, 20);
+        memcpy(msg.addr, term->my_account, 20);
         char *out = serialize(&msg);
         broadcast(&msg, term);
     }

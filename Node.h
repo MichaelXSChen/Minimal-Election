@@ -43,8 +43,9 @@ struct Term_t{
     uint64_t member_count;
     //Protocol state.
     instance_t *instances; //size is len;'
-    char my_addr[20];
+    char my_account[20];
     int sock;
+    pthread_t recvt;
 };
 
 typedef struct Term_t Term_t;

@@ -18,6 +18,7 @@ int main(int argc, char**argv) {
             elect(term, (uint64_t)i, &value);
         }
     }
+    pthread_join(term->recvt, NULL);
 
     return 0;
 }
