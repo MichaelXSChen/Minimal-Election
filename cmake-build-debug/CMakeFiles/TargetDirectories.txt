@@ -1,3 +1,3 @@
-/home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles/Leader_election.dir
+/Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles/Leader_election.dir

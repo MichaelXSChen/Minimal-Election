@@ -30,6 +30,8 @@ struct instance_t{
     char **confirmed_addr;
     int confirmed_addr_count;
     pthread_spinlock_t lock;
+    pthread_mutex_t state_lock;
+    pthread_cond_t cond;
 };
 
 

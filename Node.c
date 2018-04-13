@@ -40,6 +40,7 @@ static char* serialize(const Message *msg);
 static Message deserialize(char *input);
 static int broadcast(const Message *msg,Term_t *term);
 static int insert_addr(char **addr_array, const char *addr,  int *count);
+static void init_instance(Term_t *term, instance_t *instance);
 
 Term_t* New_Node(int offset){ //currently for hardcoded message.
     Term_t* term;
@@ -63,22 +64,7 @@ Term_t* New_Node(int offset){ //currently for hardcoded message.
     term->cur_block = term->start_block - 1;
     term->instances = (instance_t *) malloc(term->len * sizeof(instance_t));
     for (i = 0; i < term->len; i++){
-        instance_t *instance = &term->instances[i];
-
-        pthread_spin_init(&instance->lock, 0);
-        instance->max_rand = 0;
-        instance->state = STATE_EMPTY;
-        instance->confirmed_addr_count = 0;
-        instance->prepared_addr_count = 0;
-
-
-        instance->prepared_addr=(char**)malloc(term->member_count * sizeof(char*));
-        instance->confirmed_addr=(char**)malloc(term->member_count * sizeof(char*));
-        int j = 0;
-        for (j = 0; j<term->member_count; j++){
-            instance->prepared_addr[j] = (char *)malloc(20 * sizeof(char));
-            instance->confirmed_addr[j] = (char *)malloc(20 * sizeof(char));
-        }
+        init_instance(term, &term->instances[i]);
     }
 
     term->sock=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -111,10 +97,19 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
     pthread_spin_lock(&instance->lock);
     if (instance->state == STATE_EMPTY || instance->state == STATE_PREPARED || instance->state == STATE_PREPARE_SENT) {
         if (msg->rand > instance->max_rand) {
-            //receive
-            instance->max_rand = msg->rand;
+
             memcpy(instance->addr, msg->addr, 20);
+            instance->max_rand = msg->rand;
+            //Prepared for a proposal with higher ballot.
+            //If the current node is electing for this instance,
+            //it should have failed.
+            //Notify the electing thread with the news.
+            pthread_mutex_lock(&instance->state_lock);
             instance->state = STATE_PREPARED;
+            pthread_cond_broadcast(&instance->cond);
+            pthread_mutex_unlock(&instance->state_lock);
+
+
             Message resp;
             resp.rand = msg->rand;
             resp.blockNum = msg->blockNum;
@@ -152,6 +147,7 @@ void handle_prepared(const Message *msg, const struct sockaddr_in *si_other, Ter
                 printf("failed to broadcast Confirm message");
             }
         }
+        //The node is still potentially ``in-control'', No need to notify.
         instance->state = STATE_CONFIRM_SENT;
     }
     pthread_spin_unlock(&instance->lock);
@@ -182,7 +178,15 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
     if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *) &si_other, sizeof(si_other)) == -1) {
         printf("Failed to send resp");
     }
+
+    /*
+     * Same as before, answering prepared message, should have failed.
+     */
+    pthread_mutex_lock(&instance->state_lock);
     instance->state = STATE_CONFIRMED;
+    pthread_cond_broadcast(&instance->cond);
+    pthread_mutex_unlock(&instance->state_lock);
+
     pthread_spin_unlock(&instance->lock);
     return;
 }
@@ -208,8 +212,11 @@ void handle_confirmed(const Message *msg, const struct sockaddr_in *si_other, Te
             if (ret != 0){
                 printf("failed to broadcast Confirm message");
             }
+            pthread_mutex_lock(&instance->state_lock);
             instance->state = STATE_ELECTED;
-        }
+            pthread_cond_broadcast(&instance->cond);
+            pthread_mutex_unlock(&instance->state_lock);
+            }
     }
     pthread_spin_unlock(&instance->lock);
 }
@@ -259,7 +266,8 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
     srand((unsigned)time(NULL));
     uint64_t r = (uint64_t)rand();
     pthread_spin_lock(&instance->lock);
-    if (r > instance->max_rand){
+    if (r > instance->max_rand) {
+        instance->max_rand = r;
         Message msg;
         msg.blockNum = blk;
         msg.message_type = ELEC_PREPARE;
@@ -267,9 +275,17 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
         memcpy(msg.addr, term->my_account, 20);
         char *out = serialize(&msg);
         broadcast(&msg, term);
+        pthread_spin_unlock(&instance->lock);
+        pthread_mutex_lock(&instance->state_lock);
+        pthread_cond_wait(&instance->cond, &instance->state_lock);
+
+        pthread_mutex_unlock(&instance->state_lock);
+
+        if (instance->state == STATE_ELECTED) {
+            return 1;
+        }
     }
-    pthread_spin_unlock(&instance->lock);
-    sleep(1);
+    return 0;
 
 }
 //helper functions.
@@ -317,4 +333,23 @@ static int broadcast(const Message *msg, Term_t *term){
         }
     }
     return 0;
+}
+
+static void init_instance(Term_t *term, instance_t *instance){
+    pthread_spin_init(&instance->lock, 0);
+    pthread_cond_init(&instance->cond, NULL);
+    pthread_mutex_init(&instance->state_lock, NULL);
+
+    instance->max_rand = 0;
+    instance->state = STATE_EMPTY;
+    instance->confirmed_addr_count = 0;
+    instance->prepared_addr_count = 0;
+
+    instance->prepared_addr=(char**)malloc(term->member_count * sizeof(char*));
+    instance->confirmed_addr=(char**)malloc(term->member_count * sizeof(char*));
+    int j = 0;
+    for (j = 0; j<term->member_count; j++){
+        instance->prepared_addr[j] = (char *)malloc(20 * sizeof(char));
+        instance->confirmed_addr[j] = (char *)malloc(20 * sizeof(char));
+    }
 }

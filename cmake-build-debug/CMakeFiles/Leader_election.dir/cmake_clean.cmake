@@ -1,6 +1,5 @@
 file(REMOVE_RECURSE
   "CMakeFiles/Leader_election.dir/main.c.o"
-  "CMakeFiles/Leader_election.dir/API.c.o"
   "CMakeFiles/Leader_election.dir/Node.c.o"
   "Leader_election.pdb"
   "Leader_election"

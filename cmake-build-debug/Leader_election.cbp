@@ -8,92 +8,88 @@
 		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="/home/xusheng/codes/Minimal-Election/cmake-build-debug"/>
+				<Option working_dir="/Users/xusheng/codes/Leader-election/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="rebuild_cache">
-				<Option working_dir="/home/xusheng/codes/Minimal-Election/cmake-build-debug"/>
+				<Option working_dir="/Users/xusheng/codes/Leader-election/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
-				<Option working_dir="/home/xusheng/codes/Minimal-Election/cmake-build-debug"/>
+				<Option working_dir="/Users/xusheng/codes/Leader-election/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="Leader_election">
-				<Option output="/home/xusheng/codes/Minimal-Election/cmake-build-debug/Leader_election" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/xusheng/codes/Minimal-Election/cmake-build-debug"/>
+				<Option output="/Users/xusheng/codes/Leader-election/cmake-build-debug/Leader_election" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/xusheng/codes/Leader-election/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
 					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
-					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 Leader_election"/>
-					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 Leader_election"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="Leader_election/fast">
-				<Option output="/home/xusheng/codes/Minimal-Election/cmake-build-debug/Leader_election" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/xusheng/codes/Minimal-Election/cmake-build-debug"/>
+				<Option output="/Users/xusheng/codes/Leader-election/cmake-build-debug/Leader_election" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/xusheng/codes/Leader-election/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
 					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
-					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0/include"/>
+					<Add directory="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"/>
 					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 Leader_election/fast"/>
-					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j8 -f &quot;/home/xusheng/codes/Minimal-Election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 Leader_election/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/xusheng/codes/Leader-election/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/xusheng/codes/Minimal-Election/API.c">
+		<Unit filename="/Users/xusheng/codes/Leader-election/Node.c">
 			<Option target="Leader_election"/>
 		</Unit>
-		<Unit filename="/home/xusheng/codes/Minimal-Election/API.h">
+		<Unit filename="/Users/xusheng/codes/Leader-election/Node.h">
 			<Option target="Leader_election"/>
 		</Unit>
-		<Unit filename="/home/xusheng/codes/Minimal-Election/Node.c">
+		<Unit filename="/Users/xusheng/codes/Leader-election/main.c">
 			<Option target="Leader_election"/>
 		</Unit>
-		<Unit filename="/home/xusheng/codes/Minimal-Election/Node.h">
-			<Option target="Leader_election"/>
-		</Unit>
-		<Unit filename="/home/xusheng/codes/Minimal-Election/main.c">
-			<Option target="Leader_election"/>
-		</Unit>
-		<Unit filename="/home/xusheng/codes/Minimal-Election/CMakeLists.txt">
+		<Unit filename="/Users/xusheng/codes/Leader-election/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
 	</Project>

@@ -4,11 +4,10 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/xusheng/codes/Minimal-Election/API.c" "/home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles/Leader_election.dir/API.c.o"
-  "/home/xusheng/codes/Minimal-Election/Node.c" "/home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles/Leader_election.dir/Node.c.o"
-  "/home/xusheng/codes/Minimal-Election/main.c" "/home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles/Leader_election.dir/main.c.o"
+  "/Users/xusheng/codes/Leader-election/Node.c" "/Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles/Leader_election.dir/Node.c.o"
+  "/Users/xusheng/codes/Leader-election/main.c" "/Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles/Leader_election.dir/main.c.o"
   )
-set(CMAKE_C_COMPILER_ID "GNU")
+set(CMAKE_C_COMPILER_ID "AppleClang")
 
 # The include file search paths:
 set(CMAKE_C_TARGET_INCLUDE_PATH

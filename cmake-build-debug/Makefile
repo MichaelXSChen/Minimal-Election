@@ -39,19 +39,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/xusheng/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/181.4203.549/bin/cmake/bin/cmake
+CMAKE_COMMAND = "/Users/xusheng/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/181.4203.549/CLion.app/Contents/bin/cmake/bin/cmake"
 
 # The command to remove a file.
-RM = /home/xusheng/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/181.4203.549/bin/cmake/bin/cmake -E remove -f
+RM = "/Users/xusheng/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/181.4203.549/CLion.app/Contents/bin/cmake/bin/cmake" -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/xusheng/codes/Minimal-Election
+CMAKE_SOURCE_DIR = /Users/xusheng/codes/Leader-election
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/xusheng/codes/Minimal-Election/cmake-build-debug
+CMAKE_BINARY_DIR = /Users/xusheng/codes/Leader-election/cmake-build-debug
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -59,7 +59,7 @@ CMAKE_BINARY_DIR = /home/xusheng/codes/Minimal-Election/cmake-build-debug
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/home/xusheng/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/181.4203.549/bin/cmake/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	"/Users/xusheng/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/181.4203.549/CLion.app/Contents/bin/cmake/bin/cmake" -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -70,7 +70,7 @@ rebuild_cache/fast: rebuild_cache
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/home/xusheng/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/181.4203.549/bin/cmake/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+	"/Users/xusheng/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/181.4203.549/CLion.app/Contents/bin/cmake/bin/cmake" -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles /home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles /Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/xusheng/codes/Minimal-Election/cmake-build-debug/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/xusheng/codes/Leader-election/cmake-build-debug/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -122,33 +122,6 @@ Leader_election: cmake_check_build_system
 Leader_election/fast:
 	$(MAKE) -f CMakeFiles/Leader_election.dir/build.make CMakeFiles/Leader_election.dir/build
 .PHONY : Leader_election/fast
-
-API.o: API.c.o
-
-.PHONY : API.o
-
-# target to build an object file
-API.c.o:
-	$(MAKE) -f CMakeFiles/Leader_election.dir/build.make CMakeFiles/Leader_election.dir/API.c.o
-.PHONY : API.c.o
-
-API.i: API.c.i
-
-.PHONY : API.i
-
-# target to preprocess a source file
-API.c.i:
-	$(MAKE) -f CMakeFiles/Leader_election.dir/build.make CMakeFiles/Leader_election.dir/API.c.i
-.PHONY : API.c.i
-
-API.s: API.c.s
-
-.PHONY : API.s
-
-# target to generate assembly for a file
-API.c.s:
-	$(MAKE) -f CMakeFiles/Leader_election.dir/build.make CMakeFiles/Leader_election.dir/API.c.s
-.PHONY : API.c.s
 
 Node.o: Node.c.o
 
@@ -213,9 +186,6 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... Leader_election"
-	@echo "... API.o"
-	@echo "... API.i"
-	@echo "... API.s"
 	@echo "... Node.o"
 	@echo "... Node.i"
 	@echo "... Node.s"
