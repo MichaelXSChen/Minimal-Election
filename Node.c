@@ -252,6 +252,7 @@ static void *RecvFunc(void *opaque){
 }
 
 int elect(Term_t *term, uint64_t blk, uint64_t *value){
+    printf("Electing Block blk");
     uint64_t offset = blk - term->start_block;
     instance_t *instance = &term->instances[offset];
 

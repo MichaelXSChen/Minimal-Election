@@ -13,7 +13,7 @@ int main(int argc, char**argv) {
     Term_t * term = New_Node(offset);
     if (offset == 1){
         int i;
-        for (i=0; i<1000; i++){
+        for (i=10; i<500; i++){
             uint64_t value;
             elect(term, (uint64_t)i, &value);
         }
