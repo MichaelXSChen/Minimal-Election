@@ -1,6 +1,13 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.5)
 project(Leader_election C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(Leader_election main.c API.c API.h Node.h Node.c)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+
+add_executable(Leader_election main.c Node.h Node.c)
+
+target_link_libraries(Leader_election Threads::Threads)
+
