@@ -12,13 +12,13 @@ int main(int argc, char**argv) {
 
     Term_t * term = New_Node(offset);
 
-
-    sleep(10);
+    srand(time(NULL));
+    sleep(10-offset);
     int i;
-    for (i=10; i<500; i++){
+    for (i=10; i<9999; i++){
         uint64_t value;
         elect(term, (uint64_t)i, &value);
-
+        usleep(rand() % 10000);
     }
 
     pthread_join(term->recvt, NULL);

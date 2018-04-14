@@ -11,12 +11,15 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/time.h>
 
-#define DEBUG 0
+#define DEBUG 1
 #define debug_print(fmt, ...) \
             do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 
-
+#define INFO 1
+#define info_print(fmt, ...) \
+            do { if (INFO) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 
 #define BUFLEN 1024
 #define MSG_LEN 41
@@ -54,7 +57,7 @@ Term_t* New_Node(int offset){ //currently for hardcoded message.
     term->my_idx = (uint32_t)offset;
     //hard_coded;
     term->start_block = 1;
-    term->len = 1000;
+    term->len = 10000;
     term->member_count = 3;
     term->members = (struct sockaddr_in *)malloc(3 * sizeof(struct sockaddr_in));
     uint16_t x;
@@ -96,7 +99,7 @@ Term_t* New_Node(int offset){ //currently for hardcoded message.
 
 
 void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term_t *term, socklen_t si_len){
-    debug_print("Received Prepare message, blk = %ld\n", msg->blockNum);
+    debug_print("Received Prepare message, blk = %ld, from = %s, rand = %lu\n", msg->blockNum, msg->addr, msg->rand);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
@@ -195,7 +198,6 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
         return;
     }
     if (instance-> state == STATE_CONFIRM_SENT || instance ->state == STATE_CONFIRMED) {
-        debug_print("Already confirmed, Not answering confirm, blk = %lu\n", msg->blockNum);
         pthread_spin_unlock(&instance->lock);
         return;
     }
@@ -270,6 +272,21 @@ void handle_notify(const Message *msg, const struct sockaddr_in *si_other, Term_
     pthread_spin_unlock(&instance->lock);
 }
 
+void handle_announce(const Message *msg, const struct sockaddr_in *si_other, Term_t *term){
+    fprintf(stderr, "Leader elected for block %lu, leader = %s\n", msg->blockNum, msg->addr);
+    uint64_t offset = msg->blockNum - term->start_block;
+    instance_t *instance = &term->instances[offset];
+    pthread_spin_lock(&instance->lock);
+    instance->max_rand = msg->rand;
+    instance->max_member_idx = msg->owner_idx;
+
+    pthread_mutex_lock(&instance->state_lock);
+    instance->state = STATE_CONFIRMED;
+
+    pthread_cond_broadcast(&instance->cond);
+    pthread_mutex_unlock(&instance->state_lock);
+    pthread_spin_unlock(&instance->lock);
+}
 
 
 
@@ -314,7 +331,7 @@ static void *RecvFunc(void *opaque){
                 handle_confirmed(&msg, &si_other, term);
                 break;
             case ELEC_ANNOUNCE :
-                fprintf(stderr, "Leader elected for block %lu, leader = %s\n", msg.blockNum, msg.addr);
+                handle_announce(&msg, &si_other, term);
                 break;
             case ELEC_NOTIFY:
                 handle_notify(&msg, &si_other, term);
@@ -327,13 +344,17 @@ static void *RecvFunc(void *opaque){
 }
 
 int elect(Term_t *term, uint64_t blk, uint64_t *value){
-    fprintf(stderr, "Electing Block %lu\n", blk);
+    info_print("Electing Block %lu\n", blk);
     uint64_t offset = blk - term->start_block;
     instance_t *instance = &term->instances[offset];
     if (instance->state == STATE_CONFIRMED || instance->state == STATE_PREPARE_SENT || instance->state == STATE_CONFIRM_SENT){
+        info_print("[Election] for block %lu failed\n", blk);
         return 0;
     }
-    srand((unsigned)time(NULL));
+    struct timeval time;
+    gettimeofday(&time,NULL);
+    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
     uint64_t r = (uint64_t)rand();
     pthread_spin_lock(&instance->lock);
     if (r > instance->max_rand) {
@@ -352,15 +373,18 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
         broadcast(&msg, term);
         instance->state = STATE_PREPARE_SENT;
         pthread_spin_unlock(&instance->lock);
+
         pthread_mutex_lock(&instance->state_lock);
         pthread_cond_wait(&instance->cond, &instance->state_lock);
 
         pthread_mutex_unlock(&instance->state_lock);
 
         if (instance->state == STATE_ELECTED) {
+            info_print("[Election] as leader for block %lu\n", blk);
             return 1;
         }
     }
+    info_print("[Election] for block %lu failed\n", blk);
     return 0;
 
 }
