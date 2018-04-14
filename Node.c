@@ -15,7 +15,7 @@
 
 
 #define BUFLEN 1024
-#define MSG_LEN 37
+#define MSG_LEN 41
 
 #define ELEC_PREPARE 1
 #define ELEC_PREPARED 2
@@ -30,7 +30,8 @@ struct Message{
     uint64_t rand;
     uint64_t blockNum;
     uint8_t message_type;
-    char addr[20];
+    uint32_t owner_idx;    //The msg is for whom.
+    char addr[20];    //Sender of the msg.
 };
 typedef struct Message Message;
 
@@ -41,10 +42,12 @@ static Message deserialize(char *input);
 static int broadcast(const Message *msg,Term_t *term);
 static int insert_addr(char **addr_array, const char *addr,  int *count);
 static void init_instance(Term_t *term, instance_t *instance);
+static int send_to_member(int index, const Message* msg, Term_t *term);
 
 Term_t* New_Node(int offset){ //currently for hardcoded message.
     Term_t* term;
     term = (Term_t*)malloc(sizeof(Term_t));
+    term->my_idx = (uint32_t)offset;
     //hard_coded;
     term->start_block = 1;
     term->len = 1000;
@@ -102,6 +105,7 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
 
             memcpy(instance->addr, msg->addr, 20);
             instance->max_rand = msg->rand;
+            instance->max_member_idx = msg->owner_idx;
             //Prepared for a proposal with higher ballot.
             //If the current node is electing for this instance,
             //it should have failed.
@@ -116,6 +120,7 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
             resp.rand = msg->rand;
             resp.blockNum = msg->blockNum;
             resp.message_type = ELEC_PREPARED;
+            resp.owner_idx = msg->owner_idx;
             memcpy(resp.addr, term->my_account, 20);
             char *output = serialize(&resp);
             if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *)si_other, si_len) == -1) {
@@ -123,6 +128,8 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
             }
         }
     }
+
+
     pthread_spin_unlock(&instance->lock);
 }
 
@@ -149,6 +156,7 @@ void handle_prepared(const Message *msg, const struct sockaddr_in *si_other, Ter
             resp.message_type = ELEC_CONFIRM;
             resp.blockNum =  msg->blockNum;
             resp.rand = msg->rand;
+            resp.owner_idx = term->my_idx;
             ret = broadcast(&resp, term);
             if (ret != 0){
                 perror("failed to broadcast Confirm message");
@@ -184,6 +192,7 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
     resp.rand = msg->rand;
     resp.blockNum = msg->blockNum;
     resp.message_type = ELEC_CONFIRMED;
+    resp.owner_idx = msg->owner_idx;
     char *output = serialize(&resp);
     if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *)si_other, si_len) == -1){
         perror("Failed to send resp");
@@ -220,6 +229,7 @@ void handle_confirmed(const Message *msg, const struct sockaddr_in *si_other, Te
             resp.message_type = ELEC_ANNOUNCE;
             resp.blockNum =  msg->blockNum;
             resp.rand = msg->rand;
+            resp.owner_idx = msg->owner_idx;
             ret = broadcast(&resp, term);
             if (ret != 0){
                 perror("failed to broadcast Confirm message");
@@ -287,7 +297,7 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
     fprintf(stderr, "Electing Block %lu\n", blk);
     uint64_t offset = blk - term->start_block;
     instance_t *instance = &term->instances[offset];
-    if (instance->state == STATE_CONFIRMED){
+    if (instance->state == STATE_CONFIRMED || instance->state == STATE_PREPARE_SENT || instance->state == STATE_CONFIRM_SENT){
         return 0;
     }
     srand((unsigned)time(NULL));
@@ -303,6 +313,7 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
         msg.blockNum = blk;
         msg.message_type = ELEC_PREPARE;
         msg.rand = r;
+        msg.owner_idx = term->my_idx;
         memcpy(msg.addr, term->my_account, 20);
         char *out = serialize(&msg);
         broadcast(&msg, term);
@@ -327,7 +338,8 @@ static char* serialize(const Message *msg){
     memcpy(&output[0], &msg->rand, 8);
     memcpy(&output[8], &msg->blockNum, 8);
     memcpy(&output[16], &msg->message_type, 1);
-    memcpy(&output[17], msg->addr, 20);
+    memcpy(&output[17], &msg->owner_idx, 4);
+    memcpy(&output[21], msg->addr, 20);
     return output;
 }
 
@@ -336,7 +348,8 @@ static Message deserialize(char *input){
     memcpy(&msg.rand, &input[0], 8);
     memcpy(&msg.blockNum, &input[8], 8);
     memcpy(&msg.message_type, &input[16], 1);
-    memcpy(&msg.addr, &input[17], 20);
+    memcpy(&msg.owner_idx, &input[17], 4);
+    memcpy(&msg.addr, &input[21], 20);
     return msg;
 }
 
@@ -384,4 +397,14 @@ static void init_instance(Term_t *term, instance_t *instance){
         instance->prepared_addr[j] = (char *)malloc(20 * sizeof(char));
         instance->confirmed_addr[j] = (char *)malloc(20 * sizeof(char));
     }
+}
+
+static int send_to_member(int index, const Message* msg, Term_t *term){
+    char *buf = (char *) malloc(MSG_LEN * sizeof(char));
+    int ret = sendto(term->sock, buf, MSG_LEN, 0, (struct sockaddr*)&term->members[index], sizeof(struct sockaddr_in));
+    if (ret != 0){
+        perror("Failed to send to member");
+    }
+    free(buf);
+    return ret;
 }

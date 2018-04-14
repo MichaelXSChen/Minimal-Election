@@ -24,6 +24,7 @@ enum state_t{
 struct instance_t{
     enum state_t state;
     uint64_t max_rand;
+    uint32_t max_member_idx;
     char addr[20];
     char **prepared_addr;
     int prepared_addr_count;
@@ -43,6 +44,7 @@ struct Term_t{
     uint64_t cur_block;
     struct sockaddr_in *members;
     uint64_t member_count;
+    uint32_t my_idx;
     //Protocol state.
     instance_t *instances; //size is len;'
     char my_account[20];
