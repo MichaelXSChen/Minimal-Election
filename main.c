@@ -14,13 +14,13 @@ int main(int argc, char**argv) {
 
 
     sleep(10);
-    if (offset == 1){
+//    if (offset == 1){
         int i;
         for (i=10; i<500; i++){
             uint64_t value;
             elect(term, (uint64_t)i, &value);
         }
-    }
+//    }
     pthread_join(term->recvt, NULL);
 
     return 0;
