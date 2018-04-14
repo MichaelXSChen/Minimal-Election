@@ -18,6 +18,7 @@ int main(int argc, char**argv) {
     for (i=10; i<500; i++){
         uint64_t value;
         elect(term, (uint64_t)i, &value);
+
     }
 
     pthread_join(term->recvt, NULL);

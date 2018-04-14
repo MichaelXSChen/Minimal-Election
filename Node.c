@@ -12,6 +12,10 @@
 #include <string.h>
 #include <unistd.h>
 
+#define DEBUG 0
+#define debug_print(fmt, ...) \
+            do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+
 
 
 #define BUFLEN 1024
@@ -87,15 +91,12 @@ Term_t* New_Node(int offset){ //currently for hardcoded message.
         perror("Failed to create thread");
     }
 
-
-
-    fprintf(stderr, "New Node created\n");
-    return term; 
+    return term;
 }
 
 
 void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term_t *term, socklen_t si_len){
-    fprintf(stderr, "Received Prepare message, blk = %ld\n", msg->blockNum);
+    debug_print("Received Prepare message, blk = %ld\n", msg->blockNum);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
@@ -147,16 +148,15 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
 
 
 void handle_prepared(const Message *msg, const struct sockaddr_in *si_other, Term_t *term) {
-    fprintf(stderr, "Received PrepareD message, blk = %ld\n", msg->blockNum);
+    debug_print("Received PrepareD message, blk = %ld\n", msg->blockNum);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
     pthread_spin_lock(&instance->lock);
     if (instance->state == STATE_PREPARE_SENT){
         int ret = insert_addr(instance->prepared_addr, msg->addr, &instance->prepared_addr_count);
-        fprintf(stderr, "prepared count = %d\n", instance->prepared_addr_count);
+        debug_print("prepared count = %d\n", instance->prepared_addr_count);
         if (ret != 0){
-            fprintf(stderr, "Didn't insert to list");
             pthread_spin_unlock(&instance->lock);
             return;
         }
@@ -183,19 +183,19 @@ void handle_prepared(const Message *msg, const struct sockaddr_in *si_other, Ter
 
 
 void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term_t *term, socklen_t si_len) {
-    fprintf(stderr, "Received Confirm Msg, blk = %lu\n", msg->blockNum);
+    debug_print("Received Confirm Msg, blk = %lu\n", msg->blockNum);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
     pthread_spin_lock(&instance->lock);
     if (instance-> max_rand > msg->rand){
-//        fprintf(stderr, "Already prepared to larger rand, Not answering confirm");
+        debug_print("Already prepared to larger rand, Not answering confirm, blk =%lu\n", msg->blockNum);
         pthread_spin_unlock(&instance->lock);
         //already prepared a higher.
         return;
     }
     if (instance-> state == STATE_CONFIRM_SENT || instance ->state == STATE_CONFIRMED) {
-//        fprintf(stderr, "Already confirmed, Not answering confirm");
+        debug_print("Already confirmed, Not answering confirm, blk = %lu\n", msg->blockNum);
         pthread_spin_unlock(&instance->lock);
         return;
     }
@@ -219,12 +219,11 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
     pthread_mutex_unlock(&instance->state_lock);
 
     pthread_spin_unlock(&instance->lock);
-//    fprintf(stderr, "Before returning handle confirm");
     return;
 }
 
 void handle_confirmed(const Message *msg, const struct sockaddr_in *si_other, Term_t *term) {
-    fprintf(stderr, "Received ConfirmED Msg, blk = %lu\n", msg->blockNum);
+    debug_print("Received ConfirmED Msg, blk = %lu\n", msg->blockNum);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
@@ -256,7 +255,7 @@ void handle_confirmed(const Message *msg, const struct sockaddr_in *si_other, Te
 }
 
 void handle_notify(const Message *msg, const struct sockaddr_in *si_other, Term_t *term){
-    fprintf(stderr, "Received Notify Msg, blk = %lu\n", msg->blockNum);
+    debug_print("Received Notify Msg, blk = %lu\n", msg->blockNum);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     pthread_spin_lock(&instance->lock);
