@@ -9,8 +9,11 @@ int main(int argc, char**argv) {
         return 1;
     }
     int offset = atoi(argv[1]);
-    sleep(10);
+
     Term_t * term = New_Node(offset);
+
+
+    sleep(10);
     if (offset == 1){
         int i;
         for (i=10; i<500; i++){

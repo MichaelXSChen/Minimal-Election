@@ -17,11 +17,11 @@
 #define BUFLEN 1024
 #define MSG_LEN 37
 
-#define ELEC_PREPARE 0
-#define ELEC_PREPARED 1
-#define ELEC_CONFIRM 2
-#define ELEC_CONFIRMED 3
-#define ELEC_ANNOUNCE 4  //only for debug usage. 
+#define ELEC_PREPARE 1
+#define ELEC_PREPARED 2
+#define ELEC_CONFIRM 3
+#define ELEC_CONFIRMED 4
+#define ELEC_ANNOUNCE 5  //only for debug usage.
 
 
 
@@ -52,10 +52,10 @@ Term_t* New_Node(int offset){ //currently for hardcoded message.
     term->members = (struct sockaddr_in *)malloc(3 * sizeof(struct sockaddr_in));
     uint16_t x;
     for (x =0; x<3; x++){
-        memset(&term->members[x], 9, sizeof(struct sockaddr_in));
+        memset(&term->members[x], 0, sizeof(struct sockaddr_in));
         term->members[x].sin_family = AF_INET;
-        term->members[x].sin_port = htons(11110+x);
-        term->members[x].sin_addr.s_addr = htonl(INADDR_ANY);
+        term->members[x].sin_port = htons(10000+x);
+        term->members[x].sin_addr.s_addr = inet_addr("127.0.0.1");
     }
     term->my_account[0] = 'A' + offset;
 
@@ -69,13 +69,14 @@ Term_t* New_Node(int offset){ //currently for hardcoded message.
 
     term->sock=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (term->sock < 0){
-        printf("Failed to create socket");
+        perror("Failed to create socket\n");
         pthread_exit(NULL);
     }
     if (bind(term->sock, (struct sockaddr*)&term->members[offset], sizeof(term->members[offset])) == -1){
-        printf("Failed to bind to socket");
+        perror("Failed to bind to socket\n");
         pthread_exit(NULL);
     }
+
 
     int ret;
     ret = pthread_create(&term->recvt, NULL, RecvFunc, (void *)term);
@@ -90,7 +91,8 @@ Term_t* New_Node(int offset){ //currently for hardcoded message.
 }
 
 
-void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term_t *term){
+void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term_t *term, socklen_t si_len){
+    fprintf(stderr, "Received Prepare message, blk = %ld\n", msg->blockNum);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
@@ -116,8 +118,8 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
             resp.message_type = ELEC_PREPARED;
             memcpy(resp.addr, term->my_account, 20);
             char *output = serialize(&resp);
-            if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *) &si_other, sizeof(si_other)) == -1) {
-                printf("Failed to send resp");
+            if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *)si_other, si_len) == -1) {
+                perror("Failed to send resp");
             }
         }
     }
@@ -126,17 +128,22 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
 
 
 void handle_prepared(const Message *msg, const struct sockaddr_in *si_other, Term_t *term) {
+    fprintf(stderr, "Received PrepareD message, blk = %ld\n", msg->blockNum);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
     pthread_spin_lock(&instance->lock);
     if (instance->state == STATE_PREPARE_SENT){
         int ret = insert_addr(instance->prepared_addr, msg->addr, &instance->prepared_addr_count);
+        fprintf(stderr, "prepared count = %d\n", instance->prepared_addr_count);
         if (ret != 0){
+            fprintf(stderr, "Didn't insert to list");
             pthread_spin_unlock(&instance->lock);
             return;
         }
         if (instance->prepared_addr_count > term->member_count  / 2) {
+            instance->confirmed_addr[0] = term->my_account;
+            instance->confirmed_addr_count =1;
             Message resp;
             memcpy(resp.addr, term->my_account, 20);
             resp.message_type = ELEC_CONFIRM;
@@ -155,17 +162,20 @@ void handle_prepared(const Message *msg, const struct sockaddr_in *si_other, Ter
 
 
 
-void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term_t *term) {
+void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term_t *term, socklen_t si_len) {
+    fprintf(stderr, "Received Confirm Msg, blk = %lu\n", msg->blockNum);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
     pthread_spin_lock(&instance->lock);
     if (instance-> max_rand > msg->rand){
+        fprintf(stderr, "Already prepared to larger rand, Not answering confirm");
         pthread_spin_unlock(&instance->lock);
         //already prepared a higher.
         return;
     }
     if (instance-> state == STATE_CONFIRM_SENT || instance ->state == STATE_CONFIRMED) {
+        fprintf(stderr, "Already confirmed, Not answering confirm");
         pthread_spin_unlock(&instance->lock);
         return;
     }
@@ -175,8 +185,8 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
     resp.blockNum = msg->blockNum;
     resp.message_type = ELEC_CONFIRMED;
     char *output = serialize(&resp);
-    if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *) &si_other, sizeof(si_other)) == -1) {
-        printf("Failed to send resp");
+    if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *)si_other, si_len) == -1){
+        perror("Failed to send resp");
     }
 
     /*
@@ -188,10 +198,12 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
     pthread_mutex_unlock(&instance->state_lock);
 
     pthread_spin_unlock(&instance->lock);
+    fprintf(stderr, "Before returning handle confirm");
     return;
 }
 
 void handle_confirmed(const Message *msg, const struct sockaddr_in *si_other, Term_t *term) {
+    fprintf(stderr, "Received ConfirmED Msg, blk = %lu\n", msg->blockNum);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
@@ -222,8 +234,21 @@ void handle_confirmed(const Message *msg, const struct sockaddr_in *si_other, Te
 }
 
 static void *RecvFunc(void *opaque){
+
     Term_t *term = (Term_t *)opaque;
     int s = term->sock;
+
+
+    /*
+     * debug
+     */
+    struct sockaddr_in foo;
+    int len = sizeof(struct sockaddr_in);
+    getsockname(s,  (struct sockaddr *) &foo, &len);
+    fprintf(stderr, "Thread Receving network packets, listening on %s:%d\n",inet_ntoa(foo.sin_addr),
+            ntohs(foo.sin_port) );
+
+
 
     char buffer[1024];
     int recv_len;
@@ -232,18 +257,18 @@ static void *RecvFunc(void *opaque){
     while(1){
         recv_len = recvfrom(s, buffer, BUFLEN, 0, (struct sockaddr *)&si_other, &si_len);
         if (recv_len != MSG_LEN){
-            printf("Wrong Message Format");
+            fprintf(stderr, "Wrong Message Format\n");
         }
         Message msg = deserialize(buffer);
         switch(msg.message_type){
             case ELEC_PREPARE :
-                handle_prepare(&msg, &si_other, term);
+                handle_prepare(&msg, &si_other, term, si_len);
                 break;
             case ELEC_PREPARED :
                 handle_prepared(&msg, &si_other, term);
                 break;
             case ELEC_CONFIRM :
-                handle_confirm(&msg, &si_other, term);
+                handle_confirm(&msg, &si_other, term, si_len);
                 break;
             case ELEC_CONFIRMED :
                 handle_confirmed(&msg, &si_other, term);
@@ -259,7 +284,7 @@ static void *RecvFunc(void *opaque){
 }
 
 int elect(Term_t *term, uint64_t blk, uint64_t *value){
-    printf("Electing Block blk");
+    fprintf(stderr, "Electing Block %lu\n", blk);
     uint64_t offset = blk - term->start_block;
     instance_t *instance = &term->instances[offset];
 
@@ -268,6 +293,10 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
     pthread_spin_lock(&instance->lock);
     if (r > instance->max_rand) {
         instance->max_rand = r;
+        instance->prepared_addr[0] = term->my_account;
+        instance->prepared_addr_count = 1;
+
+
         Message msg;
         msg.blockNum = blk;
         msg.message_type = ELEC_PREPARE;
@@ -275,6 +304,7 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
         memcpy(msg.addr, term->my_account, 20);
         char *out = serialize(&msg);
         broadcast(&msg, term);
+        instance->state = STATE_PREPARE_SENT;
         pthread_spin_unlock(&instance->lock);
         pthread_mutex_lock(&instance->state_lock);
         pthread_cond_wait(&instance->cond, &instance->state_lock);
@@ -321,14 +351,16 @@ static int insert_addr(char **addr_array, const char *addr,  int *count){
 }
 
 static int broadcast(const Message *msg, Term_t *term){
+    fprintf(stderr, "Broadcasting Message, type = %d, blk = %lu\n", msg->message_type, msg->blockNum);
     int socket = term->sock;
     int i;
     ssize_t ret;
     char *buf = serialize(msg);
     for (i = 0; i<term->member_count; i++){
+        fprintf(stderr, "Sending to %d-th member, port = %d\n", i, ntohs(term->members[i].sin_port));
         ret = sendto(socket, buf, MSG_LEN, 0, (struct sockaddr*)&term->members[i], sizeof(struct sockaddr_in));
         if (ret == -1){
-            printf("Failed to send message");
+            fprintf(stderr, "Failed to broadcast message\n");
             return -1;
         }
     }
