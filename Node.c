@@ -345,9 +345,7 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
         info_print("[Election] for block %lu failed\n", blk);
         return 0;
     }
-    struct timeval time;
-    gettimeofday(&time,NULL);
-    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
 
     uint64_t r = (uint64_t)rand();
     pthread_mutex_lock(&instance->state_lock);
