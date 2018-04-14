@@ -103,7 +103,7 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
-    pthread_spin_lock(&instance->lock);
+    pthread_mutex_lock(&instance->state_lock);
     if (instance->state == STATE_EMPTY || instance->state == STATE_PREPARED || instance->state == STATE_PREPARE_SENT) {
         if (msg->rand > instance->max_rand) {
 
@@ -114,10 +114,10 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
             //If the current node is electing for this instance,
             //it should have failed.
             //Notify the electing thread with the news.
-            pthread_mutex_lock(&instance->state_lock);
+
             instance->state = STATE_PREPARED;
             pthread_cond_broadcast(&instance->cond);
-            pthread_mutex_unlock(&instance->state_lock);
+
 
 
             Message resp;
@@ -127,6 +127,7 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
             resp.owner_idx = msg->owner_idx;
             memcpy(resp.addr, term->my_account, 20);
             char *output = serialize(&resp);
+            debug_print("Sending PrepareED to [%s], rand = %lu\n", msg->addr, msg->rand);
             if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *)si_other, si_len) == -1) {
                 perror("Failed to send resp");
             }
@@ -140,13 +141,14 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
         resp.owner_idx = term->my_idx;
         memcpy(resp.addr, term->my_account, 20);
         char *output = serialize(&resp);
+        debug_print("Sending Notify to [%s], rand = %lu\n", msg->addr, msg->rand);
         if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *)si_other, si_len) == -1) {
             perror("Failed to send resp");
         }
         free(output);
     }
 
-    pthread_spin_unlock(&instance->lock);
+    pthread_mutex_unlock(&instance->state_lock);
 }
 
 
@@ -155,34 +157,33 @@ void handle_prepared(const Message *msg, const struct sockaddr_in *si_other, Ter
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
-    pthread_spin_lock(&instance->lock);
-    if (instance->state == STATE_PREPARE_SENT){
+    pthread_mutex_lock(&instance->state_lock);
+    if (instance->state == STATE_PREPARE_SENT) {
         int ret = insert_addr(instance->prepared_addr, msg->addr, &instance->prepared_addr_count);
         debug_print("prepared count = %d\n", instance->prepared_addr_count);
-        if (ret != 0){
-            pthread_spin_unlock(&instance->lock);
+        if (ret != 0) {
+            pthread_mutex_unlock(&instance->state_lock);
             return;
         }
-        if (instance->prepared_addr_count > term->member_count  / 2) {
+        if (instance->prepared_addr_count > term->member_count / 2) {
             instance->confirmed_addr[0] = term->my_account;
-            instance->confirmed_addr_count =1;
+            instance->confirmed_addr_count = 1;
             Message resp;
             memcpy(resp.addr, term->my_account, 20);
             resp.message_type = ELEC_CONFIRM;
-            resp.blockNum =  msg->blockNum;
+            resp.blockNum = msg->blockNum;
             resp.rand = msg->rand;
             resp.owner_idx = term->my_idx;
             ret = broadcast(&resp, term);
-            if (ret != 0){
+            if (ret != 0) {
                 perror("failed to broadcast Confirm message");
             }
         }
         //The node is still potentially ``in-control'', No need to notify.
         instance->state = STATE_CONFIRM_SENT;
     }
-    pthread_spin_unlock(&instance->lock);
+    pthread_mutex_unlock(&instance->state_lock);
 }
-
 
 
 void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term_t *term, socklen_t si_len) {
@@ -190,15 +191,15 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
-    pthread_spin_lock(&instance->lock);
+    pthread_mutex_lock(&instance->state_lock);
     if (instance-> max_rand > msg->rand){
         debug_print("Already prepared to larger rand, Not answering confirm, blk =%lu\n", msg->blockNum);
-        pthread_spin_unlock(&instance->lock);
+        pthread_mutex_unlock(&instance->state_lock);
         //already prepared a higher.
         return;
     }
     if (instance-> state == STATE_CONFIRM_SENT || instance ->state == STATE_CONFIRMED) {
-        pthread_spin_unlock(&instance->lock);
+        pthread_mutex_unlock(&instance->state_lock);
         return;
     }
     Message resp;
@@ -215,12 +216,10 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
     /*
      * Same as before, answering prepared message, should have failed.
      */
-    pthread_mutex_lock(&instance->state_lock);
     instance->state = STATE_CONFIRMED;
     pthread_cond_broadcast(&instance->cond);
-    pthread_mutex_unlock(&instance->state_lock);
 
-    pthread_spin_unlock(&instance->lock);
+    pthread_mutex_unlock(&instance->state_lock);
     return;
 }
 
@@ -229,11 +228,11 @@ void handle_confirmed(const Message *msg, const struct sockaddr_in *si_other, Te
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     int socket = term->sock;
-    pthread_spin_lock(&instance->lock);         
+    pthread_mutex_lock(&instance->state_lock);
     if (instance->state == STATE_CONFIRM_SENT) {
         int ret = insert_addr(instance->confirmed_addr, msg->addr, &instance->confirmed_addr_count);
         if (ret != 0) {
-            pthread_spin_unlock(&instance->lock);
+            pthread_mutex_unlock(&instance->state_lock);
             return;
         }
         if (instance->confirmed_addr_count > term->member_count / 2) {
@@ -247,45 +246,40 @@ void handle_confirmed(const Message *msg, const struct sockaddr_in *si_other, Te
             if (ret != 0){
                 perror("failed to broadcast Confirm message");
             }
-            pthread_mutex_lock(&instance->state_lock);
             instance->state = STATE_ELECTED;
             pthread_cond_broadcast(&instance->cond);
-            pthread_mutex_unlock(&instance->state_lock);
+
             }
     }
-    pthread_spin_unlock(&instance->lock);
+    pthread_mutex_unlock(&instance->state_lock);
 }
 
 void handle_notify(const Message *msg, const struct sockaddr_in *si_other, Term_t *term){
     debug_print("Received Notify Msg, blk = %lu\n", msg->blockNum);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
-    pthread_spin_lock(&instance->lock);
+    pthread_mutex_lock(&instance->state_lock);
     instance->max_rand = msg->rand;
     instance->max_member_idx = msg->owner_idx;
 
-    pthread_mutex_lock(&instance->state_lock);
     instance->state = STATE_CONFIRMED;
 
     pthread_cond_broadcast(&instance->cond);
     pthread_mutex_unlock(&instance->state_lock);
-    pthread_spin_unlock(&instance->lock);
 }
 
 void handle_announce(const Message *msg, const struct sockaddr_in *si_other, Term_t *term){
     fprintf(stderr, "Leader elected for block %lu, leader = %s\n", msg->blockNum, msg->addr);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
-    pthread_spin_lock(&instance->lock);
+    pthread_mutex_lock(&instance->state_lock);
     instance->max_rand = msg->rand;
     instance->max_member_idx = msg->owner_idx;
 
-    pthread_mutex_lock(&instance->state_lock);
     instance->state = STATE_CONFIRMED;
 
     pthread_cond_broadcast(&instance->cond);
     pthread_mutex_unlock(&instance->state_lock);
-    pthread_spin_unlock(&instance->lock);
 }
 
 
@@ -356,7 +350,7 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
     uint64_t r = (uint64_t)rand();
-    pthread_spin_lock(&instance->lock);
+    pthread_mutex_lock(&instance->state_lock);
     if (r > instance->max_rand) {
         instance->max_rand = r;
         instance->prepared_addr[0] = term->my_account;
@@ -372,9 +366,7 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
         char *out = serialize(&msg);
         broadcast(&msg, term);
         instance->state = STATE_PREPARE_SENT;
-        pthread_spin_unlock(&instance->lock);
 
-        pthread_mutex_lock(&instance->state_lock);
         pthread_cond_wait(&instance->cond, &instance->state_lock);
 
         pthread_mutex_unlock(&instance->state_lock);
@@ -384,6 +376,7 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
             return 1;
         }
     }
+    pthread_mutex_unlock(&instance->state_lock);
     info_print("[Election] for block %lu failed\n", blk);
     return 0;
 
@@ -438,7 +431,6 @@ static int broadcast(const Message *msg, Term_t *term){
 }
 
 static void init_instance(Term_t *term, instance_t *instance){
-    pthread_spin_init(&instance->lock, 0);
     pthread_cond_init(&instance->cond, NULL);
     pthread_mutex_init(&instance->state_lock, NULL);
 
