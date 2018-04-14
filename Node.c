@@ -198,7 +198,7 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
     pthread_mutex_unlock(&instance->state_lock);
 
     pthread_spin_unlock(&instance->lock);
-    fprintf(stderr, "Before returning handle confirm");
+//    fprintf(stderr, "Before returning handle confirm");
     return;
 }
 
@@ -274,7 +274,7 @@ static void *RecvFunc(void *opaque){
                 handle_confirmed(&msg, &si_other, term);
                 break;
             case ELEC_ANNOUNCE :
-                fprintf(stderr, "Leader elected for block %lu, leader = %s", msg.blockNum, msg.addr);
+                fprintf(stderr, "Leader elected for block %lu, leader = %s\n", msg.blockNum, msg.addr);
                 break;
 
         }
@@ -287,7 +287,9 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
     fprintf(stderr, "Electing Block %lu\n", blk);
     uint64_t offset = blk - term->start_block;
     instance_t *instance = &term->instances[offset];
-
+    if (instance->state == STATE_CONFIRMED){
+        return 0;
+    }
     srand((unsigned)time(NULL));
     uint64_t r = (uint64_t)rand();
     pthread_spin_lock(&instance->lock);
