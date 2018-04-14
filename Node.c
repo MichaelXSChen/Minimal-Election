@@ -81,12 +81,12 @@ Term_t* New_Node(int offset){ //currently for hardcoded message.
     int ret;
     ret = pthread_create(&term->recvt, NULL, RecvFunc, (void *)term);
     if (ret != 0){
-        printf("Failed to create thread");
+        perror("Failed to create thread");
     }
 
 
 
-    printf("New Node created");
+    fprintf(stderr, "New Node created\n");
     return term; 
 }
 
@@ -151,7 +151,7 @@ void handle_prepared(const Message *msg, const struct sockaddr_in *si_other, Ter
             resp.rand = msg->rand;
             ret = broadcast(&resp, term);
             if (ret != 0){
-                printf("failed to broadcast Confirm message");
+                perror("failed to broadcast Confirm message");
             }
         }
         //The node is still potentially ``in-control'', No need to notify.
@@ -169,13 +169,13 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
     int socket = term->sock;
     pthread_spin_lock(&instance->lock);
     if (instance-> max_rand > msg->rand){
-        fprintf(stderr, "Already prepared to larger rand, Not answering confirm");
+//        fprintf(stderr, "Already prepared to larger rand, Not answering confirm");
         pthread_spin_unlock(&instance->lock);
         //already prepared a higher.
         return;
     }
     if (instance-> state == STATE_CONFIRM_SENT || instance ->state == STATE_CONFIRMED) {
-        fprintf(stderr, "Already confirmed, Not answering confirm");
+//        fprintf(stderr, "Already confirmed, Not answering confirm");
         pthread_spin_unlock(&instance->lock);
         return;
     }
@@ -222,7 +222,7 @@ void handle_confirmed(const Message *msg, const struct sockaddr_in *si_other, Te
             resp.rand = msg->rand;
             ret = broadcast(&resp, term);
             if (ret != 0){
-                printf("failed to broadcast Confirm message");
+                perror("failed to broadcast Confirm message");
             }
             pthread_mutex_lock(&instance->state_lock);
             instance->state = STATE_ELECTED;
@@ -274,7 +274,7 @@ static void *RecvFunc(void *opaque){
                 handle_confirmed(&msg, &si_other, term);
                 break;
             case ELEC_ANNOUNCE :
-                printf("Leader elected for block %lu", msg.blockNum);
+                fprintf(stderr, "Leader elected for block %lu, leader = %s", msg.blockNum, msg.addr);
                 break;
 
         }
@@ -351,13 +351,11 @@ static int insert_addr(char **addr_array, const char *addr,  int *count){
 }
 
 static int broadcast(const Message *msg, Term_t *term){
-    fprintf(stderr, "Broadcasting Message, type = %d, blk = %lu\n", msg->message_type, msg->blockNum);
     int socket = term->sock;
     int i;
     ssize_t ret;
     char *buf = serialize(msg);
     for (i = 0; i<term->member_count; i++){
-        fprintf(stderr, "Sending to %d-th member, port = %d\n", i, ntohs(term->members[i].sin_port));
         ret = sendto(socket, buf, MSG_LEN, 0, (struct sockaddr*)&term->members[i], sizeof(struct sockaddr_in));
         if (ret == -1){
             fprintf(stderr, "Failed to broadcast message\n");

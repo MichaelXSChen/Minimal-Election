@@ -13,8 +13,6 @@
   <component name="ChangeListManager">
     <list default="true" id="2632bf00-b55d-4823-93e9-c34b68b7d04e" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/Node.c" beforeDir="false" afterPath="$PROJECT_DIR$/Node.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/CMakeFiles/" />
@@ -43,8 +41,8 @@
       <file leaf-file-name="Node.c" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Node.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="811">
-              <caret line="187" column="85" selection-start-line="187" selection-start-column="85" selection-end-line="187" selection-end-column="85" />
+            <state relative-caret-position="494">
+              <caret line="178" column="11" lean-forward="true" selection-start-line="178" selection-start-column="11" selection-end-line="178" selection-end-column="11" />
               <folding>
                 <element signature="e#55#72#0" expanded="true" />
               </folding>
@@ -60,6 +58,8 @@
       <find>th</find>
       <find>-th</find>
       <find>sleep</find>
+      <find>printf</find>
+      <find>not</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -147,7 +147,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="11271000" />
+    <option name="totallyTimeSpent" value="12022000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1919" y="-11" width="1922" height="1092" extended-state="6" />
@@ -363,8 +363,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Node.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="811">
-          <caret line="187" column="85" selection-start-line="187" selection-start-column="85" selection-end-line="187" selection-end-column="85" />
+        <state relative-caret-position="494">
+          <caret line="178" column="11" lean-forward="true" selection-start-line="178" selection-start-column="11" selection-end-line="178" selection-end-column="11" />
           <folding>
             <element signature="e#55#72#0" expanded="true" />
           </folding>
