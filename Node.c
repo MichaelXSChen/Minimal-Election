@@ -22,7 +22,7 @@
 #define ELEC_CONFIRM 3
 #define ELEC_CONFIRMED 4
 #define ELEC_ANNOUNCE 5  //only for debug usage.
-
+#define ELEC_NOTIFY 6 //Notify a proposer about the history before.
 
 
 
@@ -126,9 +126,21 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
             if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *)si_other, si_len) == -1) {
                 perror("Failed to send resp");
             }
+            free(output);
         }
     }
-
+    if (instance->state == STATE_ELECTED){
+        Message resp;
+        resp.rand = instance->max_rand;
+        resp.message_type = ELEC_NOTIFY;
+        resp.owner_idx = term->my_idx;
+        memcpy(resp.addr, term->my_account, 20);
+        char *output = serialize(&resp);
+        if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *)si_other, si_len) == -1) {
+            perror("Failed to send resp");
+        }
+        free(output);
+    }
 
     pthread_spin_unlock(&instance->lock);
 }
@@ -243,6 +255,25 @@ void handle_confirmed(const Message *msg, const struct sockaddr_in *si_other, Te
     pthread_spin_unlock(&instance->lock);
 }
 
+void handle_notify(const Message *msg, const struct sockaddr_in *si_other, Term_t *term){
+    fprintf(stderr, "Received Notify Msg, blk = %lu\n", msg->blockNum);
+    uint64_t offset = msg->blockNum - term->start_block;
+    instance_t *instance = &term->instances[offset];
+    pthread_spin_lock(&instance->lock);
+    instance->max_rand = msg->rand;
+    instance->max_member_idx = msg->owner_idx;
+
+    pthread_mutex_lock(&instance->state_lock);
+    instance->state = STATE_CONFIRMED;
+
+    pthread_cond_broadcast(&instance->cond);
+    pthread_mutex_unlock(&instance->state_lock);
+    pthread_spin_unlock(&instance->lock);
+}
+
+
+
+
 static void *RecvFunc(void *opaque){
 
     Term_t *term = (Term_t *)opaque;
@@ -285,6 +316,9 @@ static void *RecvFunc(void *opaque){
                 break;
             case ELEC_ANNOUNCE :
                 fprintf(stderr, "Leader elected for block %lu, leader = %s\n", msg.blockNum, msg.addr);
+                break;
+            case ELEC_NOTIFY:
+                handle_notify(&msg, &si_other, term);
                 break;
 
         }
