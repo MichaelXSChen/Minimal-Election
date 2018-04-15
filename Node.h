@@ -15,9 +15,10 @@ enum state_t{
     STATE_PREPARE_SENT = 1,
     STATE_CONFIRM_SENT = 2,
     STATE_ELECTED = 3,
+    STATE_TRANSFER_PREPARED = 4,
     //follower
-    STATE_PREPARED = 4,
-    STATE_CONFIRMED = 5
+    STATE_PREPARED = 5,
+    STATE_CONFIRMED = 6
 };
 
 

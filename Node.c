@@ -147,6 +147,28 @@ void handle_prepare(const Message *msg, const struct sockaddr_in *si_other, Term
         }
         free(output);
     }
+    if (instance->state == STATE_CONFIRM_SENT || instance->state == STATE_TRANSFER_PREPARED){
+        if (msg->rand > instance->max_rand){
+            //transfer my current vote to the other.
+            instance->state = STATE_TRANSFER_PREPARED;
+            instance->max_rand = msg->rand;
+            instance->max_member_idx = msg->owner_idx;
+            pthread_cond_broadcast(&instance->cond);
+            int i;
+            Message resp;
+            resp.rand = instance->max_rand;
+            resp.message_type = ELEC_PREPARED;
+            resp.owner_idx = msg->owner_idx;
+            for (i = 0; i<instance->confirmed_addr_count; i++){
+                memcpy(resp.addr, instance->confirmed_addr[i], 20);
+                char *output = serialize(&resp);
+                if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *)si_other, si_len) == -1) {
+                    perror("Failed to send resp");
+                }
+                free(output);
+            }
+        }
+    }
 
     pthread_mutex_unlock(&instance->state_lock);
 }
@@ -198,19 +220,38 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
         //already prepared a higher.
         return;
     }
-    if (instance-> state == STATE_CONFIRM_SENT || instance ->state == STATE_CONFIRMED) {
+    if (instance ->state == STATE_CONFIRMED || instance->state == STATE_ELECTED) {
         pthread_mutex_unlock(&instance->state_lock);
         return;
     }
-    Message resp;
-    memcpy(resp.addr, term->my_account, 20);
-    resp.rand = msg->rand;
-    resp.blockNum = msg->blockNum;
-    resp.message_type = ELEC_CONFIRMED;
-    resp.owner_idx = msg->owner_idx;
-    char *output = serialize(&resp);
-    if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *)si_other, si_len) == -1){
-        perror("Failed to send resp");
+    else if (instance->state == STATE_CONFIRM_SENT || instance->state == STATE_TRANSFER_PREPARED){
+        Message resp;
+        resp.rand = msg->rand;
+        resp.blockNum = msg->blockNum;
+        resp.message_type = ELEC_CONFIRMED;
+        resp.owner_idx = msg->owner_idx;
+        int i;
+        for (i = 0; i<instance->confirmed_addr_count; i++){
+            memcpy(resp.addr, instance->confirmed_addr[i], 20);
+            char *output = serialize(&resp);
+            if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *)si_other, si_len) == -1){
+                perror("Failed to send resp");
+            }
+            free(output);
+        }
+
+    }
+    else {
+        Message resp;
+        memcpy(resp.addr, term->my_account, 20);
+        resp.rand = msg->rand;
+        resp.blockNum = msg->blockNum;
+        resp.message_type = ELEC_CONFIRMED;
+        resp.owner_idx = msg->owner_idx;
+        char *output = serialize(&resp);
+        if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *) si_other, si_len) == -1) {
+            perror("Failed to send resp");
+        }
     }
 
     /*
