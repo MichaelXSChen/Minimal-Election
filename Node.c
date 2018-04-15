@@ -414,8 +414,9 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
             info_print("[Election] as leader for block %lu\n", blk);
             return 1;
         }
+    }else {
+        pthread_mutex_unlock(&instance->state_lock);
     }
-    pthread_mutex_unlock(&instance->state_lock);
     info_print("[Election] for block %lu failed\n", blk);
     return 0;
 
