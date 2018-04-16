@@ -224,7 +224,27 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
         pthread_mutex_unlock(&instance->state_lock);
         return;
     }
-    else if (instance->state == STATE_CONFIRM_SENT || instance->state == STATE_TRANSFER_PREPARED){
+    else if (instance->state == STATE_CONFIRM_SENT){
+        if (msg->rand > instance->max_rand) {
+            Message resp;
+            resp.rand = msg->rand;
+            resp.blockNum = msg->blockNum;
+            resp.message_type = ELEC_CONFIRMED;
+            resp.owner_idx = msg->owner_idx;
+            int i;
+            for (i = 0; i < instance->confirmed_addr_count; i++) {
+                memcpy(resp.addr, instance->confirmed_addr[i], 20);
+                char *output = serialize(&resp);
+                if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *) si_other, si_len) == -1) {
+                    perror("Failed to send resp");
+                }
+                free(output);
+            }
+            instance->state = STATE_CONFIRMED;
+            pthread_cond_broadcast(&instance->cond);
+        }
+    }
+    else if (instance->state == STATE_TRANSFER_PREPARED) {
         Message resp;
         resp.rand = msg->rand;
         resp.blockNum = msg->blockNum;
@@ -239,7 +259,8 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
             }
             free(output);
         }
-
+        instance->state = STATE_CONFIRMED;
+        pthread_cond_broadcast(&instance->cond);
     }
     else {
         Message resp;
@@ -252,14 +273,11 @@ void handle_confirm(const Message *msg, const struct sockaddr_in *si_other, Term
         if (sendto(socket, output, MSG_LEN, 0, (struct sockaddr *) si_other, si_len) == -1) {
             perror("Failed to send resp");
         }
+        instance->state = STATE_CONFIRMED;
+        pthread_cond_broadcast(&instance->cond);
+
+
     }
-
-    /*
-     * Same as before, answering prepared message, should have failed.
-     */
-    instance->state = STATE_CONFIRMED;
-    pthread_cond_broadcast(&instance->cond);
-
     pthread_mutex_unlock(&instance->state_lock);
     return;
 }
@@ -316,9 +334,9 @@ void handle_announce(const Message *msg, const struct sockaddr_in *si_other, Ter
     pthread_mutex_lock(&instance->state_lock);
     instance->max_rand = msg->rand;
     instance->max_member_idx = msg->owner_idx;
-
-    instance->state = STATE_CONFIRMED;
-
+    if (instance->state != STATE_ELECTED) {
+        instance->state = STATE_CONFIRMED;
+    }
     pthread_cond_broadcast(&instance->cond);
     pthread_mutex_unlock(&instance->state_lock);
 }
@@ -408,11 +426,14 @@ int elect(Term_t *term, uint64_t blk, uint64_t *value){
 
         pthread_cond_wait(&instance->cond, &instance->state_lock);
 
+        int state  = instance->state;
         pthread_mutex_unlock(&instance->state_lock);
 
-        if (instance->state == STATE_ELECTED) {
+        if (state == STATE_ELECTED) {
             info_print("[Election] as leader for block %lu\n", blk);
             return 1;
+        }else{
+            debug_print("[Election] Failed, state = %d\n", state);
         }
     }else {
         pthread_mutex_unlock(&instance->state_lock);
