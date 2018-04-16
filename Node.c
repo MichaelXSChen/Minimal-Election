@@ -13,11 +13,11 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-#define DEBUG 1
+#define DEBUG 0
 #define debug_print(fmt, ...) \
             do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 
-#define INFO 1
+#define INFO 0
 #define info_print(fmt, ...) \
             do { if (INFO) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 
@@ -328,7 +328,7 @@ void handle_notify(const Message *msg, const struct sockaddr_in *si_other, Term_
 }
 
 void handle_announce(const Message *msg, const struct sockaddr_in *si_other, Term_t *term){
-    fprintf(stderr, "Leader elected for block %lu, leader = %s\n", msg->blockNum, msg->addr);
+    fprintf(stderr, "[Leader] %lu %s\n", msg->blockNum, msg->addr);
     uint64_t offset = msg->blockNum - term->start_block;
     instance_t *instance = &term->instances[offset];
     pthread_mutex_lock(&instance->state_lock);
@@ -484,7 +484,7 @@ static int broadcast(const Message *msg, Term_t *term){
     for (i = 0; i<term->member_count; i++){
         ret = sendto(socket, buf, MSG_LEN, 0, (struct sockaddr*)&term->members[i], sizeof(struct sockaddr_in));
         if (ret == -1){
-            fprintf(stderr, "Failed to broadcast message\n");
+            perror("Failed to broadcast message\n");
             return -1;
         }
     }
